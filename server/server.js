@@ -7,6 +7,7 @@ var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
 
 var app = express();
+console.log(JSON.stringify({text: 'kek'}));
 
 app.use(bodyParser.json());
 
@@ -32,7 +33,8 @@ app.get('/todos', (req, res) => {
 
 app.get('/todos/:id', (req, res) => {
   var id = req.params.id;
-
+  console.log('request in', id);
+  
   if (!ObjectID.isValid(id)) {
     return res.status(404).send();
   }
