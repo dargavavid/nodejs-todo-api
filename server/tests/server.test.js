@@ -1,3 +1,5 @@
+//@ts-check
+
 const expect = require('expect');
 const request = require('supertest');
 
@@ -96,6 +98,43 @@ describe('GET /todos/:id', () => {
     const nonObjectId = 2345;
     request(app)
       .get(`/todos/${nonObjectId}`)
+      .expect(404)
+      .end(done);
+  });
+
+});
+
+describe('DELETE /todos/:id', () => {
+  it('should delete todo by id', (done) => {
+    const hexId = todos[1]._id.toHexString();
+    request(app)
+      .delete(`/todos/${hexId}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo._id).toBe(hexId);
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        done();
+      });
+
+      // Todo.findById(hexId).then((todo) => {
+      //   expect(todo).toNotExist();
+      //   done();
+      // }).catch(err => done(err));
+  });
+  it('should return 404 if todo not found', (done) => {
+    request(app)
+      .delete('/todos/5a9fdeb08ff411a905f7a7cd')
+      .expect(404)
+      .end(done);
+  });
+
+  it('should return 404 for non-object ids', (done) => {
+    request(app)
+      .delete('/todos/123')
       .expect(404)
       .end(done);
   });
