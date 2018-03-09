@@ -10,6 +10,7 @@ var {User} = require('./models/user');
 
 const port = process.env.PORT;
 const _ = require('lodash');
+const jwt = require('jsonwebtoken');
 
 var app = express();
 
@@ -93,6 +94,22 @@ app.patch('/todos/:id', (req, res) => {
 
     res.send({todo});
   }).catch(e => res.status(400).send());
+});
+
+app.post('/users', (req, res) => {
+  const body = _.pick(req.body, ['email', 'password']);
+  const user = new User({
+    email: body.email,
+    password: body.password
+  });
+  user.save().then(() => {
+    return user.generateAuthToken();
+    // res.send(doc);
+  }).then((token) => {
+    res.header('x-auth', token).send(user);
+  }).catch((e) => {
+    res.status(400).send(e);
+  })
 });
 
 app.listen(port, () => {
