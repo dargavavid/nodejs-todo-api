@@ -11,6 +11,7 @@ const {authenticate} = require('./middleware/authenticate');
 
 const port = process.env.PORT;
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 var app = express();
@@ -117,6 +118,40 @@ app.post('/users', (req, res) => {
 
 app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user);
+});
+
+app.post('/users/login', (req, res) => {
+  // const {email, password} = req.body;
+  const body = _.pick(req.body, ['email', 'password']);
+
+  User.findByCredentials(body.email, body.password).then((user) => {
+    return user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user);
+    });
+  }).catch((e) => {
+    res.status(400).send();
+  });
+  // User.findOne({email}).then((user) => {
+  //   if (!user) {
+  //     return res.status(404).send();
+  //   }
+    
+  //   bcrypt.compare(password, user.tokens[0].token, (err, result) => {
+  //     console.log(result)
+  //     if (result) {
+  //       res.send(user);
+  //     } else {
+  //       res.status(401).send();
+  //     }
+  //   });
+  //   console.log(isValidPassword);
+    
+  //   if (isValidPassword) {
+  //     res.send(user);
+  //   } else {
+  //     res.status(401).send();
+  //   }
+  // }).catch(e => res.status(400).send(e));
 });
 
 app.listen(port, () => {
